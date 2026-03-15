@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LogiTrack S.A</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/frontend/style/style.css"/>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="page-login" class="page active">
+  <div class="login-bg">
+    <div class="login-grid"></div>
+  </div>
+  <div class="login-wrap">
+    <div class="login-brand">
+      <span class="brand-icon">⬡</span>
+      <h1>LOGI<span>TRACK</span></h1>
+      <p>Sistema de Gestión de Bodegas</p>
+    </div>
+    <div class="login-card">
+      <div class="card-tag">ACCESO AL SISTEMA</div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="usuario@empresa.com" />
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" onclick="doLogin()">INGRESAR →</button>
+      <div id="login-error" class="error-msg hidden"></div>
+      <div class="login-switch">¿No tienes cuenta? <a href="#" onclick="showPage('page-register')">Registrarse</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER PAGE -->
+<div id="page-register" class="page">
+  <div class="login-bg"><div class="login-grid"></div></div>
+  <div class="login-wrap">
+    <div class="login-brand">
+      <span class="brand-icon">⬡</span>
+      <h1>LOGI<span>TRACK</span></h1>
+      <p>Crear nueva cuenta</p>
+    </div>
+    <div class="login-card wide">
+      <div class="card-tag">REGISTRO</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="reg-nombre" placeholder="Juan" />
+        </div>
+        <div class="form-group">
+          <label>Apellido</label>
+          <input type="text" id="reg-apellido" placeholder="Pérez" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Documento</label>
+          <input type="text" id="reg-documento" placeholder="1234567890" />
+        </div>
+        <div class="form-group">
+          <label>Rol</label>
+          <select id="reg-rol">
+            <option value="EMPLEADO">EMPLEADO</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="usuario@empresa.com" />
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-password" placeholder="••••••••" />
+      </div>
+      <button class="btn-primary" onclick="doRegister()">CREAR CUENTA →</button>
+      <div id="reg-error" class="error-msg hidden"></div>
+      <div id="reg-success" class="success-msg hidden"></div>
+      <div class="login-switch">¿Ya tienes cuenta? <a href="#" onclick="showPage('page-login')">Iniciar sesión</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="page-dashboard" class="page">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon small">⬡</span>
+      <span>LOGITRACK</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" onclick="switchTab('tab-dashboard', this)">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="#" class="nav-item" onclick="switchTab('tab-bodegas', this)">
+        <span class="nav-icon">◫</span> Bodegas
+      </a>
+      <a href="#" class="nav-item" onclick="switchTab('tab-productos', this)">
+        <span class="nav-icon">◧</span> Productos
+      </a>
+      <a href="#" class="nav-item" onclick="switchTab('tab-movimientos', this)">
+        <span class="nav-icon">⇄</span> Movimientos
+      </a>
+      <a href="#" class="nav-item" onclick="switchTab('tab-auditorias', this)">
+        <span class="nav-icon">◉</span> Auditorías
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div>
+          <div class="user-name" id="user-name">Usuario</div>
+          <div class="user-role" id="user-role">ROL</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">✕</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- TAB: DASHBOARD -->
+    <div id="tab-dashboard" class="tab active">
+      <div class="page-header">
+        <h2>PANEL PRINCIPAL</h2>
+        <div class="page-tag">RESUMEN OPERACIONAL</div>
+      </div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card" onclick="switchTab('tab-bodegas', document.querySelector('[onclick*=tab-bodegas]'))">
+          <div class="stat-label">BODEGAS</div>
+          <div class="stat-value" id="stat-bodegas">—</div>
+          <div class="stat-sub">Activas en el sistema</div>
+        </div>
+        <div class="stat-card" onclick="switchTab('tab-productos', document.querySelector('[onclick*=tab-productos]'))">
+          <div class="stat-label">PRODUCTOS</div>
+          <div class="stat-value" id="stat-productos">—</div>
+          <div class="stat-sub">En inventario</div>
+        </div>
+        <div class="stat-card accent">
+          <div class="stat-label">STOCK BAJO</div>
+          <div class="stat-value" id="stat-stock-bajo">—</div>
+          <div class="stat-sub">Productos &lt; 10 unidades</div>
+        </div>
+        <div class="stat-card" onclick="switchTab('tab-movimientos', document.querySelector('[onclick*=tab-movimientos]'))">
+          <div class="stat-label">MOVIMIENTOS</div>
+          <div class="stat-value" id="stat-movimientos">—</div>
+          <div class="stat-sub">Registrados</div>
+        </div>
+      </div>
+
+      <div class="section-row">
+        <div class="section-card wide">
+          <div class="section-header">
+            <span>PRODUCTOS CON STOCK BAJO</span>
+            <span class="tag-warn">ALERTA</span>
+          </div>
+          <div id="stock-bajo-list" class="table-wrap">
+            <div class="loading-text">Cargando...</div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-header">
+            <span>ÚLTIMOS MOVIMIENTOS</span>
+          </div>
+          <div id="ultimos-movimientos" class="mini-list">
+            <div class="loading-text">Cargando...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: BODEGAS -->
+    <div id="tab-bodegas" class="tab">
+      <div class="page-header">
+        <h2>BODEGAS</h2>
+        <button class="btn-primary small" onclick="openModal('modal-bodega')">+ NUEVA BODEGA</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="table-bodegas">
+          <thead>
+            <tr><th>#</th><th>NOMBRE</th><th>UBICACIÓN</th><th>CAPACIDAD</th><th>ENCARGADO</th><th>ACCIONES</th></tr>
+          </thead>
+          <tbody id="tbody-bodegas"><tr><td colspan="6" class="loading-text">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: PRODUCTOS -->
+    <div id="tab-productos" class="tab">
+      <div class="page-header">
+        <h2>PRODUCTOS</h2>
+        <button class="btn-primary small" onclick="openModal('modal-producto')">+ NUEVO PRODUCTO</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="table-productos">
+          <thead>
+            <tr><th>#</th><th>NOMBRE</th><th>CATEGORÍA</th><th>STOCK</th><th>PRECIO</th><th>BODEGA</th><th>ACCIONES</th></tr>
+          </thead>
+          <tbody id="tbody-productos"><tr><td colspan="7" class="loading-text">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: MOVIMIENTOS -->
+    <div id="tab-movimientos" class="tab">
+      <div class="page-header">
+        <h2>MOVIMIENTOS</h2>
+        <button class="btn-primary small" onclick="openModal('modal-movimiento')">+ NUEVO MOVIMIENTO</button>
+      </div>
+      <div class="filter-bar">
+        <div class="form-group inline">
+          <label>DESDE</label>
+          <input type="date" id="filtro-desde" />
+        </div>
+        <div class="form-group inline">
+          <label>HASTA</label>
+          <input type="date" id="filtro-hasta" />
+        </div>
+        <button class="btn-secondary" onclick="filtrarMovimientos()">FILTRAR</button>
+        <button class="btn-ghost" onclick="loadMovimientos()">LIMPIAR</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>#</th><th>FECHA</th><th>TIPO</th><th>ORIGEN</th><th>DESTINO</th><th>USUARIO</th><th>DESCRIPCIÓN</th></tr>
+          </thead>
+          <tbody id="tbody-movimientos"><tr><td colspan="7" class="loading-text">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: AUDITORIAS -->
+    <div id="tab-auditorias" class="tab">
+      <div class="page-header">
+        <h2>AUDITORÍAS</h2>
+      </div>
+      <div class="filter-bar">
+        <div class="form-group inline">
+          <label>OPERACIÓN</label>
+          <select id="filtro-operacion">
+            <option value="">TODAS</option>
+            <option value="INSERT">INSERT</option>
+            <option value="UPDATE">UPDATE</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+        </div>
+        <button class="btn-secondary" onclick="filtrarAuditorias()">FILTRAR</button>
+        <button class="btn-ghost" onclick="loadAuditorias()">LIMPIAR</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>#</th><th>ENTIDAD</th><th>OPERACIÓN</th><th>FECHA</th><th>USUARIO</th><th>VALOR ANTERIOR</th><th>VALOR NUEVO</th></tr>
+          </thead>
+          <tbody id="tbody-auditorias"><tr><td colspan="7" class="loading-text">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===================== MODALES ===================== -->
+
+<!-- MODAL: NUEVA BODEGA -->
+<div id="modal-bodega" class="modal-overlay hidden" onclick="closeModalOutside(event, 'modal-bodega')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>NUEVA BODEGA</span>
+      <button onclick="closeModal('modal-bodega')">✕</button>
+    </div>
+    <div class="form-group"><label>Nombre</label><input type="text" id="bod-nombre" /></div>
+    <div class="form-group"><label>Ubicación</label><input type="text" id="bod-ubicacion" /></div>
+    <div class="form-group"><label>Capacidad</label><input type="number" id="bod-capacidad" /></div>
+    <div class="form-group">
+      <label>Encargado</label>
+      <select id="bod-encargado"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modal-bodega')">CANCELAR</button>
+      <button class="btn-primary" onclick="saveBodega()">GUARDAR →</button>
+    </div>
+    <div id="bod-error" class="error-msg hidden"></div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVO PRODUCTO -->
+<div id="modal-producto" class="modal-overlay hidden" onclick="closeModalOutside(event, 'modal-producto')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>NUEVO PRODUCTO</span>
+      <button onclick="closeModal('modal-producto')">✕</button>
+    </div>
+    <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre" /></div>
+    <div class="form-group"><label>Categoría</label><input type="text" id="prod-categoria" /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Stock inicial</label><input type="number" id="prod-stock" value="0" /></div>
+      <div class="form-group"><label>Precio</label><input type="number" step="0.01" id="prod-precio" /></div>
+    </div>
+    <div class="form-group">
+      <label>Bodega</label>
+      <select id="prod-bodega"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modal-producto')">CANCELAR</button>
+      <button class="btn-primary" onclick="saveProducto()">GUARDAR →</button>
+    </div>
+    <div id="prod-error" class="error-msg hidden"></div>
+  </div>
+</div>
+
+<!-- MODAL: NUEVO MOVIMIENTO -->
+<div id="modal-movimiento" class="modal-overlay hidden" onclick="closeModalOutside(event, 'modal-movimiento')">
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <span>REGISTRAR MOVIMIENTO</span>
+      <button onclick="closeModal('modal-movimiento')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="mov-tipo" onchange="toggleBodegas()">
+          <option value="ENTRADA">ENTRADA</option>
+          <option value="SALIDA">SALIDA</option>
+          <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="datetime-local" id="mov-fecha" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" id="wrap-origen">
+        <label>Bodega Origen</label>
+        <select id="mov-origen"><option value="">-- Ninguna --</option></select>
+      </div>
+      <div class="form-group" id="wrap-destino">
+        <label>Bodega Destino</label>
+        <select id="mov-destino"><option value="">-- Ninguna --</option></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Descripción (opcional)</label>
+      <input type="text" id="mov-descripcion" placeholder="Ej: Reposición mensual" />
+    </div>
+    <div class="section-header" style="margin: 16px 0 8px;">
+      <span>PRODUCTOS</span>
+      <button class="btn-ghost small" onclick="addProductoRow()">+ AÑADIR</button>
+    </div>
+    <div id="productos-rows"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modal-movimiento')">CANCELAR</button>
+      <button class="btn-primary" onclick="saveMovimiento()">REGISTRAR →</button>
+    </div>
+    <div id="mov-error" class="error-msg hidden"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="script/app.js"></script>
+</body>
+</html>
