@@ -3,7 +3,8 @@
    Conexion via fetch al API REST (Spring Boot)
    ======================== */
 
-const API = 'http://localhost:8080/api'; // URL base del backend
+// const API = 'http://localhost:8080/api'; // URL base del backend
+const API = 'http://192.168.40.17:8080/api'; // Celular: 'http://192.168.40.17:5500'
 
 let token = null;
 let currentUser = null;
