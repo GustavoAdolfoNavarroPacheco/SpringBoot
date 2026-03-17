@@ -1,13 +1,11 @@
-package com.s1.LogiTrackS.A;
+package com.s1.LogiTrack;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Application {
-
+public class LogiTrackApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(LogiTrackApplication.class, args);
 	}
-
 }

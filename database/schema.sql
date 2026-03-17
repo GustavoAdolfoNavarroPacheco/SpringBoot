@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS LogicTrackSA;
-CREATE DATABASE IF NOT EXISTS LogicTrackSA;
-USE LogicTrackSA;
+DROP DATABASE IF EXISTS logitrack;
+CREATE DATABASE IF NOT EXISTS logitrack;
+USE logitrack;
 
 -- TABLA PERSONA --
 CREATE TABLE persona (
@@ -58,7 +58,7 @@ CREATE TABLE movimientos (
         REFERENCES bodegas(id)
 );
 
--- TABLA MOVIMIENTO_DETALLES -- 
+-- TABLA MOVIMIENTO DETALLES -- 
 CREATE TABLE movimiento_detalles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     movimiento_id INT NOT NULL,

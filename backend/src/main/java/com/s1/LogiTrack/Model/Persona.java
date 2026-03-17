@@ -1,33 +1,46 @@
-package com.s1.LogiTrackS.A.model;
+package com.s1.LogiTrack.Model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.math.BigDecimal;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
 @Entity
 @Table(name = "persona")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 
 public class Persona {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false)
-    private String documento;
-    @Column(nullable = false)
+    private Integer id;
+
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 100)
+    @Column(nullable = false, length = 100)
     private String nombre;
-    @Column(nullable = false)
+
+    @NotBlank(message = "El apellido es obligatorio")
+    @Size(max = 100)
+    @Column(nullable = false, length = 100)
     private String apellido;
+
+    @NotBlank(message = "El documento es obligatorio")
+    @Column(nullable = false, unique = true, length = 50)
+    private String documento;
+
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "El email no es valido")
+    @Column(nullable = false, unique = true, length = 150)
+    private String email;
+
+    @NotBlank(message = "La contraseña es obligatoria")
     @Column(nullable = false)
-    private Integer edad;
-    @Column(nullable = false)
-//    private BigDecimal salario;
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "profesion_id", nullable = false)
-//    private Profesion profesion;
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Rol rol;
 }

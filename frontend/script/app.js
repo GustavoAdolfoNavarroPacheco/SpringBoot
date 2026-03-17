@@ -1,9 +1,9 @@
 /* ========================
    LOGITRACK — APP.JS
-   Conexión via fetch al API REST (Spring Boot)
+   Conexion via fetch al API REST (Spring Boot)
    ======================== */
 
-const API = 'http://localhost:8080'; // Cambia esto a tu URL de Spring Boot
+const API = 'http://localhost:8080/api'; // URL base del backend
 
 let token = null;
 let currentUser = null;
@@ -22,7 +22,6 @@ function switchTab(tabId, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
   if (el) el.classList.add('active');
-  // Carga datos al entrar a cada tab
   if (tabId === 'tab-dashboard') loadDashboard();
   if (tabId === 'tab-bodegas') loadBodegas();
   if (tabId === 'tab-productos') loadProductos();
@@ -46,7 +45,6 @@ function openModal(id) {
 
 function closeModal(id) {
   document.getElementById(id).classList.add('hidden');
-  // Limpiar errores y campos
   document.querySelectorAll(`#${id} .error-msg`).forEach(e => e.classList.add('hidden'));
   document.querySelectorAll(`#${id} input`).forEach(i => i.value = '');
 }
@@ -96,7 +94,7 @@ async function apiFetch(path, options = {}) {
 
   if (res.status === 401) {
     doLogout();
-    throw new Error('Sesión expirada. Por favor inicia sesión de nuevo.');
+    throw new Error('Sesion expirada. Por favor inicia sesion de nuevo.');
   }
 
   const text = await res.text();
@@ -104,7 +102,7 @@ async function apiFetch(path, options = {}) {
   try { data = text ? JSON.parse(text) : null; } catch { data = text; }
 
   if (!res.ok) {
-    const msg = (data && (data.message || data.error)) || `Error ${res.status}`;
+    const msg = (data && (data.message || data.error || data.mensaje)) || `Error ${res.status}`;
     throw new Error(msg);
   }
   return data;
@@ -126,8 +124,8 @@ async function doLogin() {
       body: JSON.stringify({ email, password })
     });
 
-    token = data.token || data.jwt || data.accessToken;
-    currentUser = data.user || data;
+    token = data.token;
+    currentUser = data;
 
     document.getElementById('user-name').textContent = currentUser.nombre || email.split('@')[0];
     document.getElementById('user-role').textContent = currentUser.rol || 'EMPLEADO';
@@ -158,9 +156,9 @@ async function doRegister() {
   }
 
   try {
-    await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(body) });
+    await apiFetch('/auth/registro', { method: 'POST', body: JSON.stringify(body) });
     const s = document.getElementById('reg-success');
-    s.textContent = '¡Cuenta creada! Ahora puedes iniciar sesión.';
+    s.textContent = '¡Cuenta creada! Ahora puedes iniciar sesion.';
     s.classList.remove('hidden');
   } catch (e) {
     showError('reg-error', e.message);
@@ -181,7 +179,7 @@ async function loadDashboard() {
       apiFetch('/bodegas').catch(() => []),
       apiFetch('/productos').catch(() => []),
       apiFetch('/movimientos').catch(() => []),
-      apiFetch('/productos/stock-bajo').catch(() => []),
+      apiFetch('/productos/stock-bajo?limite=10').catch(() => []),
     ]);
 
     document.getElementById('stat-bodegas').textContent = Array.isArray(bodegasData) ? bodegasData.length : '?';
@@ -196,7 +194,7 @@ async function loadDashboard() {
     } else {
       sbEl.innerHTML = `
         <table class="data-table">
-          <thead><tr><th>PRODUCTO</th><th>CATEGORÍA</th><th>STOCK</th><th>BODEGA</th></tr></thead>
+          <thead><tr><th>PRODUCTO</th><th>CATEGORIA</th><th>STOCK</th><th>BODEGA</th></tr></thead>
           <tbody>
             ${stockBajoData.map(p => `
               <tr>
@@ -209,7 +207,7 @@ async function loadDashboard() {
         </table>`;
     }
 
-    // Últimos movimientos (últimos 5)
+    // Ultimos movimientos (ultimos 5)
     const ulEl = document.getElementById('ultimos-movimientos');
     const ultimos = Array.isArray(movimientosData) ? movimientosData.slice(-5).reverse() : [];
     if (ultimos.length === 0) {
@@ -217,7 +215,7 @@ async function loadDashboard() {
     } else {
       ulEl.innerHTML = ultimos.map(m => `
         <div class="mini-item">
-          ${badgeHTML(m.tipoMovimiento || m.tipo_movimiento)}
+          ${badgeHTML(m.tipoMovimiento)}
           <span class="mini-text">${formatDate(m.fecha)}</span>
         </div>`).join('');
     }
@@ -238,16 +236,16 @@ async function loadBodegas() {
       return;
     }
     tbody.innerHTML = bodegas.map(b => `
-      <tr>
-        <td><span style="font-family:var(--font-mono);color:var(--text-muted)">#${b.id}</span></td>
-        <td><strong>${b.nombre}</strong></td>
-        <td>${b.ubicacion}</td>
-        <td style="font-family:var(--font-mono)">${b.capacidad.toLocaleString()}</td>
-        <td>${b.encargadoNombre || b.encargado?.nombre || b.encargadoId || '—'}</td>
-        <td>
-          <button class="btn-icon" onclick="deleteBodega(${b.id})">✕</button>
-        </td>
-      </tr>`).join('');
+  <tr>
+    <td><span style="font-family:var(--font-mono);color:var(--text-muted)">#${b.id}</span></td>
+    <td><strong>${b.nombre}</strong></td>
+    <td>${b.ubicacion}</td>
+    <td style="font-family:var(--font-mono)">${b.capacidad ? b.capacidad.toLocaleString() : '—'}</td>
+    <td>${b.encargadoNombre || '—'}</td>
+    <td>
+      <button class="btn-icon" onclick="deleteBodega(${b.id})">✕</button>
+    </td>
+  </tr>`).join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="6" class="loading-text">Error: ${e.message}</td></tr>`;
   }
@@ -258,9 +256,7 @@ async function loadPersonasSelect() {
     const personas = await apiFetch('/personas');
     const sel = document.getElementById('bod-encargado');
     sel.innerHTML = personas.map(p => `<option value="${p.id}">${p.nombre} ${p.apellido}</option>`).join('');
-  } catch {
-    // Si no hay endpoint /personas, mostrar campo texto
-  }
+  } catch { }
 }
 
 async function saveBodega() {
@@ -270,7 +266,7 @@ async function saveBodega() {
     capacidad: parseInt(document.getElementById('bod-capacidad').value),
     encargadoId: parseInt(document.getElementById('bod-encargado').value),
   };
-  if (!body.nombre || !body.ubicacion || !body.capacidad) {
+  if (!body.nombre || !body.ubicacion || !body.capacidad || !body.encargadoId) {
     showError('bod-error', 'Completa todos los campos.'); return;
   }
   try {
@@ -301,7 +297,7 @@ async function loadBodegasSelect(selectId) {
     const hasNone = sel.querySelector('option[value=""]');
     sel.innerHTML = (hasNone ? '<option value="">-- Ninguna --</option>' : '') +
       data.map(b => `<option value="${b.id}">${b.nombre}</option>`).join('');
-  } catch {}
+  } catch { }
 }
 
 /* ======================== PRODUCTOS ======================== */
@@ -321,7 +317,7 @@ async function loadProductos() {
         <td>${p.categoria}</td>
         <td class="${p.stock < 10 ? 'stock-low' : 'stock-ok'}">${p.stock}</td>
         <td style="font-family:var(--font-mono)">$${parseFloat(p.precio).toLocaleString('es-CO')}</td>
-        <td>${p.bodegaNombre || p.bodega?.nombre || p.bodegaId || '—'}</td>
+        <td>${p.bodegaNombre || p.bodegaId || '—'}</td>
         <td>
           <button class="btn-icon" onclick="deleteProducto(${p.id})">✕</button>
         </td>
@@ -338,7 +334,7 @@ async function loadProductosSelect() {
     document.querySelectorAll('.prod-select').forEach(sel => {
       sel.innerHTML = data.map(p => `<option value="${p.id}">${p.nombre} (stock: ${p.stock})</option>`).join('');
     });
-  } catch {}
+  } catch { }
 }
 
 async function saveProducto() {
@@ -394,10 +390,10 @@ function renderMovimientos(data, tbody) {
     <tr>
       <td><span style="font-family:var(--font-mono);color:var(--text-muted)">#${m.id}</span></td>
       <td style="font-size:12px">${formatDate(m.fecha)}</td>
-      <td>${badgeHTML(m.tipoMovimiento || m.tipo_movimiento)}</td>
-      <td>${m.bodegaOrigenNombre || m.bodegaOrigen?.nombre || m.bodegaOrigenId || '—'}</td>
-      <td>${m.bodegaDestinoNombre || m.bodegaDestino?.nombre || m.bodegaDestinoId || '—'}</td>
-      <td>${m.usuarioNombre || m.usuario?.nombre || m.usuarioId || '—'}</td>
+      <td>${badgeHTML(m.tipoMovimiento)}</td>
+      <td>${m.bodegaOrigenNombre || '—'}</td>
+      <td>${m.bodegaDestinoNombre || '—'}</td>
+      <td>${m.usuarioNombre || '—'}</td>
       <td style="color:var(--text-muted);font-size:12px">${m.descripcion || '—'}</td>
     </tr>`).join('');
 }
@@ -408,7 +404,7 @@ async function filtrarMovimientos() {
   const tbody = document.getElementById('tbody-movimientos');
   if (!desde || !hasta) { showToast('Selecciona rango de fechas', 'err'); return; }
   try {
-    const data = await apiFetch(`/movimientos/filtrar?desde=${desde}T00:00:00&hasta=${hasta}T23:59:59`);
+    const data = await apiFetch(`/movimientos/por-fechas?inicio=${desde}T00:00:00&fin=${hasta}T23:59:59`);
     renderMovimientos(data, tbody);
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="7" class="loading-text">Error: ${e.message}</td></tr>`;
@@ -441,14 +437,12 @@ function addProductoRow() {
     <button onclick="this.closest('.producto-row').remove()">✕</button>
   `;
   container.appendChild(div);
-  // Poblar el select recién creado
   const sel = div.querySelector('.prod-select');
   sel.innerHTML = productos.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 }
 
 async function saveMovimiento() {
   const tipo = document.getElementById('mov-tipo').value;
-  const fecha = document.getElementById('mov-fecha').value;
   const origenId = document.getElementById('mov-origen').value || null;
   const destinoId = document.getElementById('mov-destino').value || null;
   const descripcion = document.getElementById('mov-descripcion').value.trim();
@@ -461,13 +455,12 @@ async function saveMovimiento() {
     if (pid && cant) detalles.push({ productoId: parseInt(pid), cantidad: parseInt(cant) });
   });
 
-  if (!fecha || detalles.length === 0) {
-    showError('mov-error', 'Completa la fecha y agrega al menos un producto.'); return;
+  if (detalles.length === 0) {
+    showError('mov-error', 'Agrega al menos un producto.'); return;
   }
 
   const body = {
     tipoMovimiento: tipo,
-    fecha: fecha + ':00',
     bodegaOrigenId: origenId ? parseInt(origenId) : null,
     bodegaDestinoId: destinoId ? parseInt(destinoId) : null,
     descripcion: descripcion || null,
@@ -480,7 +473,7 @@ async function saveMovimiento() {
     closeModal('modal-movimiento');
     document.getElementById('productos-rows').innerHTML = '';
     loadMovimientos();
-    loadProductos(); // Actualizar stocks
+    loadProductos();
   } catch (e) {
     showError('mov-error', e.message);
   }
@@ -491,7 +484,7 @@ async function saveMovimiento() {
 async function loadAuditorias() {
   const tbody = document.getElementById('tbody-auditorias');
   try {
-    const data = await apiFetch('/auditorias');
+    const data = await apiFetch('/auditoria');
     renderAuditorias(data, tbody);
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="7" class="loading-text">Error: ${e.message}</td></tr>`;
@@ -500,17 +493,17 @@ async function loadAuditorias() {
 
 function renderAuditorias(data, tbody) {
   if (!data || !data.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="loading-text">No hay auditorías registradas</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="loading-text">No hay auditorias registradas</td></tr>';
     return;
   }
-  const colors = { INSERT: 'badge-entrada', UPDATE: 'badge-transferencia', DELETE: 'badge-salida' };
+  const colors = { CREAR: 'badge-entrada', ACTUALIZAR: 'badge-transferencia', ELIMINAR: 'badge-salida' };
   tbody.innerHTML = data.map(a => `
     <tr>
       <td><span style="font-family:var(--font-mono);color:var(--text-muted)">#${a.id}</span></td>
-      <td><strong>${a.entidad}</strong></td>
+      <td><strong>${a.entidad || '—'}</strong></td>
       <td><span class="mini-badge ${colors[a.operacion] || ''}">${a.operacion}</span></td>
       <td style="font-size:12px">${formatDate(a.fecha)}</td>
-      <td>${a.usuarioNombre || a.usuario?.nombre || a.usuarioId || '—'}</td>
+      <td>${a.usuarioNombre || '—'}</td>
       <td style="font-size:11px;color:var(--text-muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.valorAnterior || ''}">${a.valorAnterior || '—'}</td>
       <td style="font-size:11px;color:var(--text-muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.valorNuevo || ''}">${a.valorNuevo || '—'}</td>
     </tr>`).join('');
@@ -520,7 +513,7 @@ async function filtrarAuditorias() {
   const op = document.getElementById('filtro-operacion').value;
   const tbody = document.getElementById('tbody-auditorias');
   try {
-    const url = op ? `/auditorias/filtrar?operacion=${op}` : '/auditorias';
+    const url = op ? `/auditoria/por-operacion?operacion=${op}` : '/auditoria';
     const data = await apiFetch(url);
     renderAuditorias(data, tbody);
   } catch (e) {
@@ -529,7 +522,6 @@ async function filtrarAuditorias() {
 }
 
 /* ======================== INIT ======================== */
-// Tecla Enter en login
 document.getElementById('login-password').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
