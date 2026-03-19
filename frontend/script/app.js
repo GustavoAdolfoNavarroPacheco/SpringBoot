@@ -3,13 +3,17 @@
    Conexion via fetch al API REST (Spring Boot)
    ======================== */
 
-// const API = 'http://localhost:8080/api'; // URL base del backend
-const API = 'http://10.158.3.37:8080/api'; // Celular: 'http://192.168.40.17:5500'
+// const API = 'http://localhost:8080/api';
+const API = 'http://10.117.47.37:8080/api';
 
 let token = null;
 let currentUser = null;
 let bodegas = [];
 let productos = [];
+
+// IDs de edicion activos
+let editBodegaId = null;
+let editProductoId = null;
 
 /* ======================== UTILIDADES ======================== */
 
@@ -31,8 +35,23 @@ function switchTab(tabId, el) {
 }
 
 function openModal(id) {
-  if (id === 'modal-bodega') loadPersonasSelect();
-  if (id === 'modal-producto') loadBodegasSelect('prod-bodega');
+  if (id === 'modal-bodega') {
+    editBodegaId = null;
+    document.getElementById('modal-bodega-titulo').textContent = 'Nueva Bodega';
+    document.getElementById('bod-nombre').value = '';
+    document.getElementById('bod-ubicacion').value = '';
+    document.getElementById('bod-capacidad').value = '';
+    loadPersonasSelect();
+  }
+  if (id === 'modal-producto') {
+    editProductoId = null;
+    document.getElementById('modal-producto-titulo').textContent = 'Nuevo Producto';
+    document.getElementById('prod-nombre').value = '';
+    document.getElementById('prod-categoria').value = '';
+    document.getElementById('prod-stock').value = '0';
+    document.getElementById('prod-precio').value = '';
+    loadBodegasSelect('prod-bodega');
+  }
   if (id === 'modal-movimiento') {
     loadBodegasSelect('mov-origen');
     loadBodegasSelect('mov-destino');
@@ -131,9 +150,18 @@ async function doLogin() {
     document.getElementById('user-name').textContent = currentUser.nombre || email.split('@')[0];
     document.getElementById('user-role').textContent = currentUser.rol || 'EMPLEADO';
     document.getElementById('user-avatar').textContent = (currentUser.nombre || email)[0].toUpperCase();
+    document.getElementById('mobile-avatar').textContent = (currentUser.nombre || email)[0].toUpperCase();
 
     showPage('page-dashboard');
     loadDashboard();
+
+    // Ocultar auditorias si es EMPLEADO
+    const navAuditoria = document.getElementById('nav-auditorias');
+    if (currentUser.rol === 'EMPLEADO') {
+      navAuditoria.style.display = 'none';
+    } else {
+      navAuditoria.style.display = '';
+    }
 
   } catch (e) {
     showError('login-error', e.message || 'Credenciales incorrectas.');
@@ -232,32 +260,65 @@ async function loadBodegas() {
   const tbody = document.getElementById('tbody-bodegas');
   try {
     bodegas = await apiFetch('/bodegas');
+    const todosProductos = await apiFetch('/productos');
+
     if (!bodegas.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="loading-text">No hay bodegas registradas</td></tr>';
       return;
     }
-    tbody.innerHTML = bodegas.map(b => `
-  <tr>
-    <td><span style="font-family:var(--font-mono);color:var(--text-muted)">#${b.id}</span></td>
-    <td><strong>${b.nombre}</strong></td>
-    <td>${b.ubicacion}</td>
-    <td style="font-family:var(--font-mono)">${b.capacidad ? b.capacidad.toLocaleString() : '—'}</td>
-    <td>${b.encargadoNombre || '—'}</td>
-    <td>
-      <button class="btn-icon" onclick="deleteBodega(${b.id})">✕</button>
-    </td>
-  </tr>`).join('');
+
+    tbody.innerHTML = bodegas.map(b => {
+      const productosEnBodega = todosProductos.filter(p => p.bodegaId === b.id);
+      const totalStock = productosEnBodega.reduce((sum, p) => sum + p.stock, 0);
+      const capacidad = b.capacidad || 0;
+      const porcentaje = capacidad > 0 ? Math.min((totalStock / capacidad) * 100, 100) : 0;
+      const colorBarra = porcentaje >= 80 ? 'var(--red)' : porcentaje >= 50 ? 'var(--yellow)' : 'var(--green)';
+
+      return `
+        <tr>
+          <td><span style="font-family:var(--font-mono);color:var(--text-muted)">#${b.id}</span></td>
+          <td><strong>${b.nombre}</strong></td>
+          <td>${b.ubicacion}</td>
+          <td>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-size:12px;font-weight:700">${totalStock} / ${capacidad}</span>
+              <div style="background:var(--bg4);border-radius:99px;height:5px;width:100px">
+                <div style="background:${colorBarra};width:${porcentaje}%;height:100%;border-radius:99px;transition:width 0.3s"></div>
+              </div>
+            </div>
+          </td>
+          <td>${b.encargadoNombre || '—'}</td>
+          <td style="display:flex;gap:6px">
+            <button class="btn-icon" style="color:var(--blue);border-color:rgba(59,130,246,0.3)" onclick="editBodega(${b.id})">✎</button>
+            <button class="btn-icon" onclick="deleteBodega(${b.id})">✕</button>
+          </td>
+        </tr>`;
+    }).join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="6" class="loading-text">Error: ${e.message}</td></tr>`;
   }
 }
 
-async function loadPersonasSelect() {
+async function loadPersonasSelect(selectedId = null) {
   try {
     const personas = await apiFetch('/personas');
     const sel = document.getElementById('bod-encargado');
-    sel.innerHTML = personas.map(p => `<option value="${p.id}">${p.nombre} ${p.apellido}</option>`).join('');
+    sel.innerHTML = personas.map(p =>
+      `<option value="${p.id}" ${selectedId == p.id ? 'selected' : ''}>${p.nombre} ${p.apellido}</option>`
+    ).join('');
   } catch { }
+}
+
+async function editBodega(id) {
+  const bodega = bodegas.find(b => b.id === id);
+  if (!bodega) return;
+  editBodegaId = id;
+  document.getElementById('modal-bodega-titulo').textContent = 'Editar Bodega';
+  document.getElementById('bod-nombre').value = bodega.nombre;
+  document.getElementById('bod-ubicacion').value = bodega.ubicacion;
+  document.getElementById('bod-capacidad').value = bodega.capacidad;
+  await loadPersonasSelect(bodega.encargadoId);
+  document.getElementById('modal-bodega').classList.remove('hidden');
 }
 
 async function saveBodega() {
@@ -271,8 +332,14 @@ async function saveBodega() {
     showError('bod-error', 'Completa todos los campos.'); return;
   }
   try {
-    await apiFetch('/bodegas', { method: 'POST', body: JSON.stringify(body) });
-    showToast('Bodega registrada correctamente ✓');
+    if (editBodegaId) {
+      await apiFetch(`/bodegas/${editBodegaId}`, { method: 'PUT', body: JSON.stringify(body) });
+      showToast('Bodega actualizada correctamente ✓');
+    } else {
+      await apiFetch('/bodegas', { method: 'POST', body: JSON.stringify(body) });
+      showToast('Bodega registrada correctamente ✓');
+    }
+    editBodegaId = null;
     closeModal('modal-bodega');
     loadBodegas();
   } catch (e) {
@@ -319,13 +386,28 @@ async function loadProductos() {
         <td class="${p.stock < 10 ? 'stock-low' : 'stock-ok'}">${p.stock}</td>
         <td style="font-family:var(--font-mono)">$${parseFloat(p.precio).toLocaleString('es-CO')}</td>
         <td>${p.bodegaNombre || p.bodegaId || '—'}</td>
-        <td>
+        <td style="display:flex;gap:6px">
+          <button class="btn-icon" style="color:var(--blue);border-color:rgba(59,130,246,0.3)" onclick="editProducto(${p.id})">✎</button>
           <button class="btn-icon" onclick="deleteProducto(${p.id})">✕</button>
         </td>
       </tr>`).join('');
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="7" class="loading-text">Error: ${e.message}</td></tr>`;
   }
+}
+
+async function editProducto(id) {
+  const producto = productos.find(p => p.id === id);
+  if (!producto) return;
+  editProductoId = id;
+  document.getElementById('modal-producto-titulo').textContent = 'Editar Producto';
+  document.getElementById('prod-nombre').value = producto.nombre;
+  document.getElementById('prod-categoria').value = producto.categoria;
+  document.getElementById('prod-stock').value = producto.stock;
+  document.getElementById('prod-precio').value = producto.precio;
+  await loadBodegasSelect('prod-bodega');
+  document.getElementById('prod-bodega').value = producto.bodegaId;
+  document.getElementById('modal-producto').classList.remove('hidden');
 }
 
 async function loadProductosSelect() {
@@ -350,8 +432,14 @@ async function saveProducto() {
     showError('prod-error', 'Completa todos los campos.'); return;
   }
   try {
-    await apiFetch('/productos', { method: 'POST', body: JSON.stringify(body) });
-    showToast('Producto registrado correctamente ✓');
+    if (editProductoId) {
+      await apiFetch(`/productos/${editProductoId}`, { method: 'PUT', body: JSON.stringify(body) });
+      showToast('Producto actualizado correctamente ✓');
+    } else {
+      await apiFetch('/productos', { method: 'POST', body: JSON.stringify(body) });
+      showToast('Producto registrado correctamente ✓');
+    }
+    editProductoId = null;
     closeModal('modal-producto');
     loadProductos();
   } catch (e) {
@@ -438,8 +526,28 @@ function addProductoRow() {
     <button onclick="this.closest('.producto-row').remove()">✕</button>
   `;
   container.appendChild(div);
-  const sel = div.querySelector('.prod-select');
-  sel.innerHTML = productos.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+  filtrarProductosPorBodega(div.querySelector('.prod-select'));
+}
+
+function filtrarProductosPorBodega(sel) {
+  const tipo = document.getElementById('mov-tipo').value;
+  const origenId = parseInt(document.getElementById('mov-origen').value);
+
+  let productosFiltrados = productos;
+
+  if ((tipo === 'SALIDA' || tipo === 'TRANSFERENCIA') && origenId) {
+    productosFiltrados = productos.filter(p => p.bodegaId === origenId);
+  }
+
+  sel.innerHTML = productosFiltrados.length
+    ? productosFiltrados.map(p => `<option value="${p.id}">${p.nombre} (stock: ${p.stock})</option>`).join('')
+    : '<option value="">— Sin productos en esta bodega —</option>';
+}
+
+function actualizarProductosMovimiento() {
+  document.querySelectorAll('.prod-select').forEach(sel => {
+    filtrarProductosPorBodega(sel);
+  });
 }
 
 async function saveMovimiento() {

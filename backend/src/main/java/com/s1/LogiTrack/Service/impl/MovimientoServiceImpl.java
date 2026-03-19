@@ -62,13 +62,51 @@ public class MovimientoServiceImpl implements MovimientoService {
 
             if (request.getTipoMovimiento() == TipoMovimiento.ENTRADA) {
                 producto.setStock(producto.getStock() + detalleRequest.getCantidad());
-            } else {
+                productoRepository.save(producto);
+
+            } else if (request.getTipoMovimiento() == TipoMovimiento.SALIDA) {
                 if (producto.getStock() < detalleRequest.getCantidad()) {
                     throw new RuntimeException("Stock insuficiente para: " + producto.getNombre());
                 }
                 producto.setStock(producto.getStock() - detalleRequest.getCantidad());
+                productoRepository.save(producto);
+
+            } else if (request.getTipoMovimiento() == TipoMovimiento.TRANSFERENCIA) {
+                if (producto.getStock() < detalleRequest.getCantidad()) {
+                    throw new RuntimeException("Stock insuficiente para transferir: " + producto.getNombre());
+                }
+                if (bodegaDestino == null) {
+                    throw new RuntimeException("Debes seleccionar una bodega destino para la transferencia");
+                }
+
+                // Restar stock en bodega origen
+                producto.setStock(producto.getStock() - detalleRequest.getCantidad());
+                productoRepository.save(producto);
+
+                // Buscar si ya existe el producto en la bodega destino
+                Producto productoDestino = productoRepository.findAll()
+                        .stream()
+                        .filter(p -> p.getNombre().equals(producto.getNombre())
+                                && p.getBodega().getId().equals(bodegaDestino.getId()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (productoDestino != null) {
+                    // Si ya existe sumar stock
+                    productoDestino.setStock(productoDestino.getStock() + detalleRequest.getCantidad());
+                    productoRepository.save(productoDestino);
+                } else {
+                    // Si no existe crear el producto en la bodega destino
+                    Producto nuevoProducto = new Producto();
+                    nuevoProducto.setNombre(producto.getNombre());
+                    nuevoProducto.setCategoria(producto.getCategoria());
+                    nuevoProducto.setPrecio(producto.getPrecio());
+                    nuevoProducto.setStock(detalleRequest.getCantidad());
+                    nuevoProducto.setBodega(bodegaDestino);
+                    productoRepository.save(nuevoProducto);
+                }
             }
-            productoRepository.save(producto);
+
             productosAfectados.append(producto.getNombre())
                     .append(" (").append(detalleRequest.getCantidad()).append("), ");
 

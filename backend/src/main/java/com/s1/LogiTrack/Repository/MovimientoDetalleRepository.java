@@ -10,4 +10,6 @@ import java.util.List;
 public interface MovimientoDetalleRepository extends JpaRepository<MovimientoDetalle, Integer> {
 
     List<MovimientoDetalle> findByMovimientoId(Integer movimientoId);
+
+    void deleteByProductoId(Integer productoId);
 }

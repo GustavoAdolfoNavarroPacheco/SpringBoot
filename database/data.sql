@@ -7,10 +7,10 @@ USE logitrack;
 
 -- PERSONAS
 INSERT INTO persona (nombre, apellido, documento, email, password, rol) VALUES
-('Admin',    'Principal',  '123456789',  'admin@logitrack.com',    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'ADMIN'),
-('Carlos',   'Ramírez',    '987654321',  'carlos@logitrack.com',   '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'EMPLEADO'),
-('Sofía',    'Torres',     '456789123',  'sofia@logitrack.com',    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'EMPLEADO'),
-('Miguel',   'Hernández',  '321654987',  'miguel@logitrack.com',   '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'ADMIN');
+('Admin',    'Principal',  '123456789',  'admin@logitrack.com',    '$2a$10$vvMIcnwci64e3FObomK4b.dvfahMLFlmetyV3kh8MVs6zvyGIDZRm', 'ADMIN'),
+('Carlos',   'Ramírez',    '987654321',  'carlos@logitrack.com',   '$2a$10$vvMIcnwci64e3FObomK4b.dvfahMLFlmetyV3kh8MVs6zvyGIDZRm', 'EMPLEADO'),
+('Sofía',    'Torres',     '456789123',  'sofia@logitrack.com',    '$2a$10$vvMIcnwci64e3FObomK4b.dvfahMLFlmetyV3kh8MVs6zvyGIDZRm', 'EMPLEADO'),
+('Miguel',   'Hernández',  '321654987',  'miguel@logitrack.com',   '$2a$10$vvMIcnwci64e3FObomK4b.dvfahMLFlmetyV3kh8MVs6zvyGIDZRm', 'ADMIN');
 
 -- BODEGAS
 INSERT INTO bodegas (nombre, ubicacion, capacidad, encargado_id) VALUES
@@ -39,11 +39,11 @@ INSERT INTO movimientos (fecha, tipo_movimiento, descripcion, usuario_id, bodega
 ('2026-03-05 10:00:00', 'SALIDA',  'Despacho pedido #001',              2, 1,    NULL),
 ('2026-03-08 11:30:00', 'ENTRADA', 'Reposición pallets',                1, NULL, 1),
 ('2026-03-10 14:00:00', 'SALIDA',  'Despacho pedido #002',              3, 2,    NULL),
-('2026-03-12 08:00:00', 'ENTRADA', 'Ingreso papelería',                 1, NULL, 3),
+('2026-03-12 08:00:00', 'ENTRADA', 'Ingreso papelería',                 1, 1, 3),
 ('2026-03-15 16:00:00', 'SALIDA',  'Despacho pedido #003',              2, 4,    NULL);
 
 -- MOVIMIENTO DETALLE
-INSERT INTO movimiento_detalle (movimiento_id, producto_id, cantidad) VALUES
+INSERT INTO movimiento_detalles (movimiento_id, producto_id, cantidad) VALUES
 (1, 1, 50),
 (1, 2, 80),
 (2, 8, 20),
@@ -60,12 +60,12 @@ INSERT INTO movimiento_detalle (movimiento_id, producto_id, cantidad) VALUES
 
 -- AUDITORIAS
 INSERT INTO auditorias (entidad, operacion, fecha, usuario_id, valor_anterior, valor_nuevo) VALUES
-('Producto',    'CREAR',        '2026-03-01 08:30:00', 1, NULL,                           'Se creó el producto: Caja de cartón grande'),
-('Producto',    'CREAR',        '2026-03-01 08:31:00', 1, NULL,                           'Se creó el producto: Caja de cartón pequeña'),
-('Producto',    'CREAR',        '2026-03-01 08:32:00', 1, NULL,                           'Se creó el producto: Pallet de madera'),
-('Bodega',      'CREAR',        '2026-03-01 08:00:00', 1, NULL,                           'Se creó la bodega: Bodega Central'),
-('Bodega',      'CREAR',        '2026-03-01 08:05:00', 1, NULL,                           'Se creó la bodega: Bodega Norte'),
-('Movimiento',  'CREAR',        '2026-03-01 08:30:00', 1, NULL,                           'Movimiento ENTRADA — Productos: Caja de cartón grande (50), Caja de cartón pequeña (80)'),
-('Movimiento',  'CREAR',        '2026-03-05 10:00:00', 2, NULL,                           'Movimiento SALIDA — Productos: Caja de cartón grande (10), Pallet de madera (5)'),
-('Producto',    'ACTUALIZAR',   '2026-03-08 11:30:00', 1, 'stock: 60',                    'Se actualizó el producto: Pallet de madera'),
-('Bodega',      'ELIMINAR',     '2026-03-10 09:00:00', 1, 'Bodega Vieja - stock mínimo',  NULL);
+('Producto', 'CREAR',        '2026-03-01 08:30:00', 1, NULL, 'Se creó el producto: Caja de cartón grande'),
+('Producto', 'CREAR',        '2026-03-01 08:31:00', 1, NULL,                           'Se creó el producto: Caja de cartón pequeña'),
+('Producto', 'CREAR',        '2026-03-01 08:32:00', 1, NULL,                           'Se creó el producto: Pallet de madera'),
+('Bodega', 'CREAR',        '2026-03-01 08:00:00', 1, NULL,                           'Se creó la bodega: Bodega Central'),
+('Bodega', 'CREAR',        '2026-03-01 08:05:00', 1, NULL,                           'Se creó la bodega: Bodega Norte'),
+('Movimiento', 'CREAR',        '2026-03-01 08:30:00', 1, NULL,                           'Movimiento ENTRADA — Productos: Caja de cartón grande (50), Caja de cartón pequeña (80)'),
+('Movimiento', 'CREAR',        '2026-03-05 10:00:00', 2, NULL,                           'Movimiento SALIDA — Productos: Caja de cartón grande (10), Pallet de madera (5)'),
+('Producto', 'ACTUALIZAR',   '2026-03-08 11:30:00', 1, 'stock: 60',                    'Se actualizó el producto: Pallet de madera'),
+('Bodega', 'ELIMINAR',     '2026-03-10 09:00:00', 1, 'Bodega Vieja - stock mínimo',  NULL);

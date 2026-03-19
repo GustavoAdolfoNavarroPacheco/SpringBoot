@@ -4,12 +4,14 @@ import com.s1.LogiTrack.Dto.Request.ProductoRequest;
 import com.s1.LogiTrack.Dto.Response.ProductoResponse;
 import com.s1.LogiTrack.Model.*;
 import com.s1.LogiTrack.Repository.BodegaRepository;
+import com.s1.LogiTrack.Repository.MovimientoDetalleRepository;
 import com.s1.LogiTrack.Repository.ProductoRepository;
 import com.s1.LogiTrack.Security.SecurityUtils;
 import com.s1.LogiTrack.Service.AuditoriaService;
 import com.s1.LogiTrack.Service.ProductoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ public class ProductoServiceImpl implements ProductoService {
     private final BodegaRepository bodegaRepository;
     private final AuditoriaService auditoriaService;
     private final SecurityUtils securityUtils;
+    private final MovimientoDetalleRepository movimientoDetalleRepository;
 
     @Override
     public ProductoResponse crear(ProductoRequest request) {
@@ -86,9 +89,13 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
+    @Transactional
     public void eliminar(Integer id) {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        // Eliminar detalles de movimiento asociados primero
+        movimientoDetalleRepository.deleteByProductoId(id);
 
         Persona usuario = securityUtils.getUsuarioActual();
         auditoriaService.registrar(
