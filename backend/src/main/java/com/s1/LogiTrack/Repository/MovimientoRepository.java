@@ -12,6 +12,6 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Integer>
 
     List<Movimiento> findByFechaBetween(LocalDateTime desde, LocalDateTime hasta);
     List<Movimiento> findTop10ByOrderByFechaDesc();
-    List<Movimiento> countById(Integer id);
-    List<Movimiento> countByTipo_Movimiento(String TipoMovimiento);
+//    List<Movimiento> countById(Integer id);
+//    List<Movimiento> countByTipo_Movimiento(String TipoMovimiento);
 }

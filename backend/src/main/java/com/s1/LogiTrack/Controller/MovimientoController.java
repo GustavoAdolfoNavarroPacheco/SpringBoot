@@ -52,27 +52,27 @@ public class MovimientoController {
         return ResponseEntity.ok(movimientoService.listarRecientes());
     }
 
-    @GetMapping("/cantidad")
-    public ResponseEntity<List<MovimientoResponse>> cantidad(
-            @RequestParam Integer id) {
-        return ResponseEntity.ok(movimientoService.cantidad(id));
-    }
-
-    @GetMapping("/cantidad")
-    public ResponseEntity<List<MovimientoResponse>> cantidadEntrada(
-            @RequestParam Integer id) {
-        return ResponseEntity.ok(movimientoService.cantidad(id));
-    }
-
-    @GetMapping("/cantidad")
-    public ResponseEntity<List<MovimientoResponse>> cantidadSalida(
-            @RequestParam Integer id) {
-        return ResponseEntity.ok(movimientoService.cantidad(id));
-    }
-
-    @GetMapping("/cantidad")
-    public ResponseEntity<List<MovimientoResponse>> cantidadTransferencia(
-            @RequestParam Integer id) {
-        return ResponseEntity.ok(movimientoService.cantidad(id));
-    }
+//    @GetMapping("/cantidad")
+//    public ResponseEntity<List<MovimientoResponse>> cantidad(
+//            @RequestParam Integer id) {
+//        return ResponseEntity.ok(movimientoService.cantidad(id));
+//    }
+//
+//    @GetMapping("/cantidad")
+//    public ResponseEntity<List<MovimientoResponse>> cantidadEntrada(
+//            @RequestParam Integer id) {
+//        return ResponseEntity.ok(movimientoService.cantidad(id));
+//    }
+//
+//    @GetMapping("/cantidad")
+//    public ResponseEntity<List<MovimientoResponse>> cantidadSalida(
+//            @RequestParam Integer id) {
+//        return ResponseEntity.ok(movimientoService.cantidad(id));
+//    }
+//
+//    @GetMapping("/cantidad")
+//    public ResponseEntity<List<MovimientoResponse>> cantidadTransferencia(
+//            @RequestParam Integer id) {
+//        return ResponseEntity.ok(movimientoService.cantidad(id));
+//    }
 }

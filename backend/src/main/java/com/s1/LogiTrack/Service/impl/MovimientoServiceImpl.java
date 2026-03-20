@@ -135,17 +135,17 @@ public class MovimientoServiceImpl implements MovimientoService {
         return toResponse(movimiento);
     }
 
-    @Override
-    public List<MovimientoResponse> cantidad(Integer id) {
-        Movimiento movimientos = (Movimiento) movimientoRepository.countById(id);
-        return Collections.singletonList(toResponse(movimientos));
-    }
-
-    @Override
-    public List<MovimientoResponse> cantidadPorMovimiento(String TipoMovimiento) {
-        List<Movimiento> movimientos = movimientoRepository.countByTipo_Movimiento(TipoMovimiento);
-        return Collections.singletonList(toResponse((Movimiento) movimientos));
-    }
+//    @Override
+//    public List<MovimientoResponse> cantidad(Integer id) {
+//        Movimiento movimientos = (Movimiento) movimientoRepository.countById(id);
+//        return Collections.singletonList(toResponse(movimientos));
+//    }
+//
+//    @Override
+//    public List<MovimientoResponse> cantidadPorMovimiento(String TipoMovimiento) {
+//        List<Movimiento> movimientos = movimientoRepository.countByTipo_Movimiento(TipoMovimiento);
+//        return Collections.singletonList(toResponse((Movimiento) movimientos));
+//    }
 
     @Override
     public List<MovimientoResponse> obtenerTodos() {
