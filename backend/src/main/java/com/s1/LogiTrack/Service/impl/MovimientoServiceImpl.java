@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -135,6 +136,18 @@ public class MovimientoServiceImpl implements MovimientoService {
     }
 
     @Override
+    public List<MovimientoResponse> cantidad(Integer id) {
+        Movimiento movimientos = (Movimiento) movimientoRepository.countById(id);
+        return Collections.singletonList(toResponse(movimientos));
+    }
+
+    @Override
+    public List<MovimientoResponse> cantidadPorMovimiento(String TipoMovimiento) {
+        List<Movimiento> movimientos = movimientoRepository.countByTipo_Movimiento(TipoMovimiento);
+        return Collections.singletonList(toResponse((Movimiento) movimientos));
+    }
+
+    @Override
     public List<MovimientoResponse> obtenerTodos() {
         return movimientoRepository.findAll()
                 .stream()
@@ -149,6 +162,15 @@ public class MovimientoServiceImpl implements MovimientoService {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<MovimientoResponse> listarRecientes() {
+        return movimientoRepository.findTop10ByOrderByFechaDesc()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
 
     private MovimientoResponse toResponse(Movimiento movimiento) {
         MovimientoResponse response = new MovimientoResponse();

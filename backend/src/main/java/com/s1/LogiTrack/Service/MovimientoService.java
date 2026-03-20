@@ -12,4 +12,7 @@ public interface MovimientoService {
     MovimientoResponse obtenerPorId(Integer id);
     List<MovimientoResponse> obtenerTodos();
     List<MovimientoResponse> obtenerPorFechas(LocalDateTime inicio, LocalDateTime fin);
+    List<MovimientoResponse> listarRecientes();
+    List<MovimientoResponse> cantidad(Integer id);
+    List<MovimientoResponse> cantidadPorMovimiento(String TipoMovimiento);
 }

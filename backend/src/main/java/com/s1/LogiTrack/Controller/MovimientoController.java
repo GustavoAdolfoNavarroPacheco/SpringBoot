@@ -46,4 +46,33 @@ public class MovimientoController {
             @RequestParam LocalDateTime fin) {
         return ResponseEntity.ok(movimientoService.obtenerPorFechas(inicio, fin));
     }
+
+    @GetMapping("/recientes")
+    public ResponseEntity<List<MovimientoResponse>> listarRecientes() {
+        return ResponseEntity.ok(movimientoService.listarRecientes());
+    }
+
+    @GetMapping("/cantidad")
+    public ResponseEntity<List<MovimientoResponse>> cantidad(
+            @RequestParam Integer id) {
+        return ResponseEntity.ok(movimientoService.cantidad(id));
+    }
+
+    @GetMapping("/cantidad")
+    public ResponseEntity<List<MovimientoResponse>> cantidadEntrada(
+            @RequestParam Integer id) {
+        return ResponseEntity.ok(movimientoService.cantidad(id));
+    }
+
+    @GetMapping("/cantidad")
+    public ResponseEntity<List<MovimientoResponse>> cantidadSalida(
+            @RequestParam Integer id) {
+        return ResponseEntity.ok(movimientoService.cantidad(id));
+    }
+
+    @GetMapping("/cantidad")
+    public ResponseEntity<List<MovimientoResponse>> cantidadTransferencia(
+            @RequestParam Integer id) {
+        return ResponseEntity.ok(movimientoService.cantidad(id));
+    }
 }
