@@ -1,6 +1,16 @@
 
 # LogiTrack S.A - Sistema de Gestion de Bodegas
 
+## Link Web
+[Click Aqui](https://gustavoadolfonavarropacheco.github.io/Logitrack/frontend/)
+
+```bash
+Importante!
+
+Para la visualizacion general de la pagina es necesario la ejecucion del backend.
+```
+---
+
 ## Descripcion
 
 LogiTrack es un sistema backend desarrollado en **Spring Boot** para la gestion de bodegas, productos y movimientos de inventario. Permite registrar entradas y salidas de productos, controlar el stock en tiempo real, gestionar multiples bodegas y llevar un registro de auditoria de todas las operaciones realizadas.
